@@ -38,15 +38,15 @@ function armor.update_armor(name, pl)
 		if v:get_definition() and v:get_definition().protection then
 			p = p - v:get_definition().protection
 		end
-		armor.data[name][k] = v:to_string() 
+		armor.data[name][k] = v:to_string()
 		print(armor.data[name][k])
 	end
 	pl:set_armor_groups({friendly = p})
 	armor.save_armor()
 end
 
-default.inv_form = default.inv_form .. "list[detached:armor_%s;main;0,0.5;2,2;]"
-default.inv_form = default.inv_form.. default.itemslot_bg(0,0.5,2,2)
+default.crafting_add = "list[detached:armor_%s;main;0,0.5;2,2;]"
+default.crafting_add = default.crafting_add .. default.itemslot_bg(0,0.5,2,2)
 
 function armor.load_armor()
 	local input = io.open(armor.armor_file, "r")
@@ -57,7 +57,7 @@ function armor.load_armor()
 			if minetest.deserialize(str) then
 				armor.data = minetest.deserialize(str)
 			end
-		else 
+		else
 			print("[WARNING] armor file is empty")
 		end
 		io.close(input)
@@ -82,10 +82,10 @@ minetest.register_on_joinplayer(function(player)
 	end
 
 	armor.invs[player:get_player_name()] = minetest.create_detached_inventory("armor_" .. player:get_player_name(), {
-		on_put = function(inv, listname, index, stack, player) 
+		on_put = function(inv, listname, index, stack, player)
 			armor.update_armor(player:get_player_name(), player)
 		end,
-		on_take = function(inv, listname, index, stack, player) 
+		on_take = function(inv, listname, index, stack, player)
 			armor.update_armor(player:get_player_name(), player)
 		end,
 	})
@@ -102,7 +102,7 @@ minetest.register_on_joinplayer(function(player)
 		armor.data[player:get_player_name()] = {}
 	end
 	armor.update_armor(player:get_player_name(), player)
-	
+
 end)
 
 minetest.register_on_leaveplayer(function(player)

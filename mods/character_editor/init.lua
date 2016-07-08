@@ -33,19 +33,19 @@ function character_editor.set_texture(player, pos, texture)
 	character_editor.update_character(player)
 end
 
-character_editor.window = "size[8,7.5;]"
-character_editor.window = character_editor.window .. default.gui_colors
-character_editor.window = character_editor.window .. default.gui_bg
-character_editor.window = character_editor.window .. "label[0,0;Select your language! All dialogs will be translated\nin this language. Items are not translated.\nIf you cant find your language in this list,\n pls send a private message to cd2 on the minetest forums.]"
-character_editor.window = character_editor.window .. "button[3,2;2,1;lang_EN;EN]"
-character_editor.window = character_editor.window .. "button[3,3;2,1;lang_DE;DE]"
-character_editor.window = character_editor.window .. "button[3,4;2,1;lang_FR;FR]"
-character_editor.window = character_editor.window .. "button[3,6;2,1;lang_ID;ID]"
-character_editor.window = character_editor.window .. "button[3,5;2,1;lang_TR;TR]"
+character_editor.window = "size[8,3.4]" .. default.gui_colors ..
+		default.gui_bg ..
+		"label[0.1,0;" ..
+		minetest.formspec_escape([[Select your language!
+Dialogs are translated, but items are not.
+If you can't find your language in this list,
+pls send a private message to cd2 on the minetest forums. ]]) ..
+		[[
+			]dropdown[0.25,2;8;language;EN,DE,FR,ID,TR;1]
+			button_exit[2.5,2.8;3,1;set;Save and Exit] ]]
 
 function character_editor.show_window(player)
-	local name = player:get_player_name()
-	minetest.show_formspec(name, "character_editor:language", character_editor.window)
+	minetest.show_formspec(player:get_player_name(), "character_editor:language", character_editor.window)
 end
 
 minetest.register_chatcommand("shirt", {
@@ -63,33 +63,54 @@ minetest.register_chatcommand("shirt", {
 	end,
 })
 
-minetest.register_on_joinplayer(function(player)
+minetest.register_on_newplayer(function(player)
 	character_editor.mesh[player:get_player_name()] = "character.x"
 	character_editor.characters[player:get_player_name()] = {}
 	character_editor.set_texture(player, 1, "character.png")
 	character_editor.show_window(player)
 end)
 
-minetest.register_on_player_receive_fields(function(player, formname, fields)
+function character_editor.on_receive_fields(player, formname, fields)
 	if formname == "character_editor:language" then
-		print("FORM")
-		print("Player "..player:get_player_name().." submitted fields "..dump(fields))
 		local name = player:get_player_name()
-		if fields["lang_EN"] then
-			print("EN")
-			character_editor.language[name] = ""
-		elseif fields["lang_DE"] then
-			print("DE")
-			character_editor.language[name] = "de/"
-		elseif fields["lang_FR"] then
-			print("FR")
-			character_editor.language[name] = "fr/"
-		elseif fields["lang_ID"] then
-			print("ID")
-			character_editor.language[name] = "id/"
-		elseif fields["lang_TR"] then
-			print("TR")
-			character_editor.language[name] = "tr/"
+		if fields.language and not fields.quit then
+			local val = fields.language
+			if val == "EN" then
+				print("EN")
+				character_editor.language[name] = ""
+			elseif val == "DE" then
+				print("DE")
+				character_editor.language[name] = "de/"
+			elseif val == "FR" then
+				print("FR")
+				character_editor.language[name] = "fr/"
+			elseif val == "ID" then
+				print("ID")
+				character_editor.language[name] = "id/"
+			elseif val == "TR" then
+				print("TR")
+				character_editor.language[name] = "tr/"
+			else
+				print("Invalid option " .. val)
+			end
 		end
 	end
-end)
+end
+minetest.register_on_player_receive_fields(character_editor.on_receive_fields)
+
+sfinv.register_page("character_editor", {
+	title = "Character",
+	get = function(self, player, context, vars)
+		return vars.layout ..
+			"label[2.25,0;" ..
+			minetest.formspec_escape([[Select your language!
+Dialogs are translated, but items are not.]]) ..
+			[[
+				]dropdown[2.25,1;6;language;EN,DE,FR,ID,TR;1]
+			]] ..
+			default.crafting_add:format(player:get_player_name())
+	end,
+	on_player_receive_fields = function(self, player, context, fields)
+		return character_editor.on_receive_fields(player, "character_editor:language", fields)
+	end
+})

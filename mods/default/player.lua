@@ -10,34 +10,16 @@ end
 
 default.gui_bg = "bgcolor[#a88e69FF;false]"
 default.gui_colors = "listcolors[#00000000;#10101030;#00000000;#68B259;#FFF]"
-
-default.inv_form = "size[8,7.5;]"
-default.inv_form = default.inv_form..default.gui_colors
-default.inv_form = default.inv_form..default.gui_bg
-default.inv_form = default.inv_form.."list[current_player;main;0,3.5;8,4;]"
-default.inv_form = default.inv_form..default.itemslot_bg(0,3.5,8,4)
-default.inv_form = default.inv_form.."list[current_player;craft;2.5,0.5;3,1;]"
-default.inv_form = default.inv_form..default.itemslot_bg(2.5,0.5,3,1)
-default.inv_form = default.inv_form.."list[current_player;craftpreview;3.5,1.5;1,1;]"
-default.inv_form = default.inv_form..default.itemslot_bg(3.5,1.5,1,1)
-
-default.craft_form = "size[8,7.5;]"
-default.craft_form = default.craft_form..default.gui_colors
-default.craft_form = default.craft_form..default.gui_bg
-default.craft_form = default.craft_form.."list[current_player;main;0,3.5;8,4;]"
-default.craft_form = default.craft_form..default.itemslot_bg(0,3.5,8,4)
-default.craft_form = default.craft_form.."list[current_player;craft;1.5,0;3,3;]"
-default.craft_form = default.craft_form..default.itemslot_bg(1.5,0,3,3)
-default.craft_form = default.craft_form.."list[current_player;craftpreview;5,1;1,1;]"
-default.craft_form = default.craft_form..default.itemslot_bg(5,1,1,1)
+default.gui_bg_img = ""--"background[5,5;1,1;gui_formbg.png;true]"
+default.gui_slots = "listcolors[#00000069;#5A5A5A;#141318;#30434C;#FFF]"
 
 default.player_anim = {}
 
 minetest.register_on_joinplayer(function(player)
 	player:hud_set_hotbar_image("gui_hotbar.png")
 	player:hud_set_hotbar_selected_image("gui_hotbar_selected.png")
-	player:set_inventory_formspec(default.inv_form:format(player:get_player_name()))
-	
+	-- player:set_inventory_formspec(default.inv_form:format(player:get_player_name()))
+
 	player:set_properties({
 		mesh = "character.x",
 		textures = {"character.png"},
@@ -85,4 +67,3 @@ minetest.register_globalstep(function(dtime)
 		end
 	end
 end)
-

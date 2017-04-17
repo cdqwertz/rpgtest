@@ -172,6 +172,20 @@ function xp.explorer_xp()
 		
 	end) 
 end
+function xp.crafter_xp()
+	minetest.register_on_craft(function(itemstack, player)
+		print(tostring(itemstack:get_name()))
+		print(tostring(itemstack:get_definition().paramtype2))
+		local craft_xp = itemstack:get_definition().craft_xp
+		if craft_xp then
+			xp.add_xp(player, craft_xp)
+		end
+			
+		
+	end)
+end
+
+xp.crafter_xp()
 xp.explorer_xp()
 xp.load_xp()
 xp.load_levels()

@@ -4,6 +4,7 @@ minetest.register_node("default:workbench", {
 	description = "Workbench",
 	tiles = {"default_workbench_top.png", "default_wooden_planks.png"},
 	groups = {choppy = 3},
+	craft_xp = 10,
 	on_construct = function(pos)
 		local meta = minetest.get_meta(pos)
 		meta:set_string("formspec", default.craft_form)

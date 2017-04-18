@@ -153,6 +153,7 @@ minetest.register_node("default:stones_on_floor", {
 			},
 	},
 	drop = "default:stone_item 2",
+	
 
 })
 
@@ -541,6 +542,7 @@ default.register_wool("black")
 
 minetest.register_node("default:stone", {
 	description = "Stone",
+	
 	tiles = {"default_stone.png"},
 	groups = {cracky = 3, stone= 1},
 	drop = {
@@ -551,6 +553,7 @@ minetest.register_node("default:stone", {
 		}
 	},
 	sounds = default.sounds.stone(),
+	miner_xp ={xp = 10,rnd = 20},
 })
 
 minetest.register_node("default:desert_stone", {
@@ -662,6 +665,7 @@ minetest.register_node("default:stone_with_coal", {
 	groups = {cracky = 2},
 	drop = "default:coal_lump",
 	sounds = default.sounds.stone(),
+	miner_xp ={xp = -1, rm = true}
 })
 
 minetest.register_node("default:stone_with_iron", {
@@ -669,6 +673,7 @@ minetest.register_node("default:stone_with_iron", {
 	tiles = {"default_stone_with_iron.png"},
 	groups = {cracky = 2},
 	sounds = default.sounds.stone(),
+	miner_xp = {xp = 50},
 })
 
 minetest.register_node("default:stone_with_copper", {
@@ -705,6 +710,7 @@ minetest.register_node("default:stone_with_diamond", {
 	groups = {hard = 2},
 	drop = "default:diamond",
 	sounds = default.sounds.stone(),
+	miner_xp = {xp = 14, lvls = 5}
 })
 
 minetest.register_node("default:stone_with_ruby", {

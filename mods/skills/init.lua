@@ -405,36 +405,38 @@ skills.register_tool("bow", 1, 30, {
 })
 
 
-minetest.override_item("default:stone_with_coal", {
-	on_dig = function(pos, node, player)
-		if skills.lvls[player:get_player_name()] then
-			xp.add_xp(player, (skills.lvls[player:get_player_name()]["miner"]-1))
-		end
-		minetest.node_dig(pos, node, player)
-	end,
-})
-
-minetest.override_item("default:stone_with_diamond", {
-	on_dig = function(pos, node, player)
-		if skills.lvls[player:get_player_name()] and skills.lvls[player:get_player_name()]["miner"] > 5 then
-			xp.add_xp(player,xp.get_xp(xp.player_levels[player:get_player_name()], 14))
-		end
-		minetest.node_dig(pos, node, player)
-	end,
-})
-
-minetest.override_item("default:stone", {
-	on_dig = function(pos, node, player)
-		if skills.lvls[player:get_player_name()] and skills.lvls[player:get_player_name()]["miner"] then
-			if skills.lvls[player:get_player_name()]["miner"] > 1 then
-				if math.random(0, 20) == 1 then
-					xp.add_xp(player,10)
-				end
-			end
-		end
-		minetest.node_dig(pos, node, player)
-	end,
-})
+-- minetest.override_item("default:stone_with_coal", {
+-- 	on_dig = function(pos, node, player)
+-- 		if skills.lvls[player:get_player_name()] then
+-- 			xp.add_xp(player, (skills.lvls[player:get_player_name()]["miner"]-1))
+-- 		end
+-- 		minetest.node_dig(pos, node, player)
+-- 	end,
+-- })
+-- 
+-- minetest.override_item("default:stone_with_diamond", {
+-- 	on_dig = function(pos, node, player)
+-- 		if skills.lvls[player:get_player_name()] and skills.lvls[player:get_player_name()]["miner"] > 5 then
+-- 			xp.add_xp(player,xp.get_xp(xp.player_levels[player:get_player_name()], 14))
+-- 		end
+-- 		minetest.node_dig(pos, node, player)
+-- 	end,
+-- })
+-- 
+-- minetest.override_item("default:stone", {
+-- 	on_dig = function(pos, node, player)
+-- 		if skills.lvls[player:get_player_name()] and skills.lvls[player:get_player_name()]["miner"] then
+-- 			if skills.lvls[player:get_player_name()]["miner"] > 1 then
+-- 				if math.random(0, 20) == 1 then
+-- 					xp.add_xp(player,10)
+-- 				end
+-- 			end
+-- 		end
+-- 		minetest.node_dig(pos, node, player)
+-- 	end,
+-- 	
+-- 	
+-- })
 
 local modpath = minetest.get_modpath("skills")
 

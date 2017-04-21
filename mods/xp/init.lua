@@ -187,30 +187,22 @@ function xp.miner_xp()
 		local miner_xp = minetest.registered_nodes[oldnode.name].miner_xp
 		local player = digger:get_player_name()
 		local player_lvls = skills.lvls[player]
-		
 		if not miner_xp then
-			print(tostring('nothing to do'))
-			
 		elseif miner_xp.rm then
-			print(tostring('example coal'))
 			if player_lvls then
 				xp.add_xp(digger, (player_lvls["miner"]-1))
 				
 			end
 		elseif miner_xp.lvls then
-			print(tostring('example diamond'))
 			if player_lvls and player_lvls["miner"] > 5 then
 				xp.add_xp(digger,xp.get_xp(xp.player_levels[player], 14))
 			end
 		elseif miner_xp.rnd then
-			print(tostring('example random'))
 			if math.random(miner_xp.rnd) == miner_xp.rnd then
 				xp.add_xp(digger, miner_xp.xp)	
 			end
 		elseif miner_xp.xp then 
-			print(tostring('basic example'))
 			xp.add_xp(digger, miner_xp.xp)
-
 		end
 	end)
 end

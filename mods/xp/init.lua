@@ -207,9 +207,19 @@ function xp.miner_xp()
 	end)
 end
 
+function xp.builder_xp()
+	minetest.register_on_placenode(function(pos, newnode, placer)
+		local builder_xp = minetest.registered_nodes[newnode.name].builder_xp
+		if builder_xp then
+			xp.add_xp(placer, builder_xp)
+		end
+	end)
+end
+
 xp.miner_xp()
 xp.crafter_xp()
 xp.explorer_xp()
+xp.builder_xp()
 
 xp.load_xp()
 xp.load_levels()

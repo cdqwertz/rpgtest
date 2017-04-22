@@ -513,6 +513,7 @@ minetest.register_node("default:glass", {
 	inventory_image = minetest.inventorycube("default_glass.png"),
 	paramtype = "light",
 	groups = {crumbly = 3},
+	builder_xp = 3,
 })
 
 -- wool

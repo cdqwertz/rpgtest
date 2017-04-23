@@ -23,7 +23,7 @@ minetest.register_abm({
 			local d = vector.distance(pos, p)
 			
 			if d < 6 then
-				local n = mobs.get_mob(xp.player_levels[player:get_player_name()])
+				local n = mobs.get_mob(player:get_attribute('lvl'))
 				minetest.add_entity(vector.new(pos.x, pos.y + 1, pos.z), n)
 			end
 		end

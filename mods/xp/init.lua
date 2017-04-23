@@ -1,17 +1,19 @@
 xp = {}
 xp.lvl = 20
-xp.player_xp = {}
-xp.player_levels = {}
 xp.xp_hud = {}
 xp.level_hud = {}
-
-xp.xp_file = minetest.get_worldpath() .. "/xp"
-xp.lvl_file = minetest.get_worldpath() .. "/levels"
-
 xp.custom_level_system = false
 
 function xp.set_level_hud_text(player, str)
 	player:hud_change(xp.level_hud[player:get_player_name()], "text", str)
+end
+
+local function getXp(player)
+	return tonumber(player:get_attribute('xp'))
+end
+
+local function getLvl(player)
+	return tonumber(player:get_attribute('lvl'))
 end
 
 function xp.get_xp(lvl, x)
@@ -19,139 +21,57 @@ function xp.get_xp(lvl, x)
 end
 
 function xp.add_xp(player, num)
-	if xp.player_xp[player:get_player_name()] then
-		xp.player_xp[player:get_player_name()] = xp.player_xp[player:get_player_name()] + num
-	else
-		xp.player_xp[player:get_player_name()] = num
-		if not xp.player_levels[player:get_player_name()] then
-			xp.player_levels[player:get_player_name()] = 1
-		end
+	player:set_attribute('xp',getXp(player) + num)
+	cmsg.push_message_player(player, "[xp] +"..tostring(num))
+	if getXp(player) > xp.lvl * getLvl(player) then
+		player:set_attribute('xp', getXp(player) - (xp.lvl * getLvl(player)))
+		xp.add_lvl(player)
 	end
-
-	if num > 0 then
-		cmsg.push_message_player(player, "[xp] +"..tostring(num))
-	end
-
-	if xp.player_levels[player:get_player_name()] then
-		if xp.player_xp[player:get_player_name()] > xp.lvl*xp.player_levels[player:get_player_name()] then
-			xp.player_xp[player:get_player_name()] = xp.player_xp[player:get_player_name()] - xp.lvl*xp.player_levels[player:get_player_name()]
-			xp.add_lvl(player)
-		end
-	else
-		xp.player_levels[player:get_player_name()] = 1
-	end
-	print("[info] xp for player ".. player:get_player_name() .. " " .. xp.player_xp[player:get_player_name()].."/"..xp.lvl*xp.player_levels[player:get_player_name()].." = " .. (xp.player_xp[player:get_player_name()])/(xp.lvl*xp.player_levels[player:get_player_name()]))
-	player:hud_change(xp.xp_hud[player:get_player_name()], "number", 20*((xp.player_xp[player:get_player_name()])/(xp.lvl*xp.player_levels[player:get_player_name()])))
-	xp.save_xp()
-	xp.save_levels()
+	print("[info] xp for player ".. player:get_player_name() .. " " .. getXp(player).."/".. xp.lvl * getLvl(player).." = " .. getXp(player) / ( xp.lvl * getLvl(player)))
+	player:hud_change(xp.xp_hud[player:get_player_name()], "number", 20 * ((getXp(player)) / (xp.lvl * getLvl(player))))
 end
 
 function xp.add_lvl(player)
-	if xp.player_levels[player:get_player_name()] then
-		xp.player_levels[player:get_player_name()] = xp.player_levels[player:get_player_name()] + 1
-	else
-		xp.player_levels[player:get_player_name()] = 1
-	end
-	xp.save_levels()
+	player:set_attribute('lvl',getLvl(player) + 1)
 	if not(xp.custom_level_system) then
-		player:hud_change(xp.level_hud[player:get_player_name()], "text", xp.player_levels[player:get_player_name()])
+		player:hud_change(xp.level_hud[player:get_player_name()], "text", getLvl(player))
 	end
-	cmsg.push_message_player(player, "Level up! You are now Level " .. tostring(xp.player_levels[player:get_player_name()]))
+	cmsg.push_message_player(player, "Level up! You are now Level " .. tostring(getLvl(player)))
 end
 
-minetest.register_on_joinplayer(function(player)
-	if not player then
-		return
-	end
-	if xp.player_xp[player:get_player_name()] and xp.player_levels[player:get_player_name()] then
-		xp.xp_hud[player:get_player_name()] = player:hud_add({
-			hud_elem_type = "statbar",
-			position = {x=0.5,y=1.0},
-			size = {x=16, y=16},
-		   	offset = {x=-(32*8+16), y=-(48*2+16)},
-			text = "xp_xp.png",
-			number = 20*((xp.player_xp[player:get_player_name()])/(xp.lvl*xp.player_levels[player:get_player_name()])),
-		})
-		xp.level_hud[player:get_player_name()] = player:hud_add({
-			hud_elem_type = "text",
-			position = {x=0.5,y=1},
-			text = xp.player_levels[player:get_player_name()],
-			number = 0xFFFFFF,
-			alignment = {x=0.5,y=1},
-			offset = {x=0, y=-(48*2+16)},
-		})
-	else
-		xp.player_xp[player:get_player_name()] = 0
-		xp.player_levels[player:get_player_name()] = 1
-		xp.xp_hud[player:get_player_name()] = player:hud_add({
-			hud_elem_type = "statbar",
-			position = {x=0.5,y=1.0},
-			size = {x=16, y=16},
-		   	offset = {x=-(32*8+16), y=-(48*2+16)},
-			text = "xp_xp.png",
-			number = 0,
-		})
-		xp.level_hud[player:get_player_name()] = player:hud_add({
-			hud_elem_type = "text",
-			position = {x=0.5,y=1},
-			text = "1",
-			number = 0xFFFFFF,
-			alignment = {x=0.5,y=1},
-			offset = {x=0, y=-(48*2+16)},
-		})
-	end
-end)
-
-function xp.load_xp()
-	local input = io.open(xp.xp_file, "r")
-	if input then
-		local str = input:read()
-		if str then
-			for k, v in str.gmatch(str,"(%w+)=(%w+)") do
-    			xp.player_xp[k] = tonumber(v)
-			end
+function xp.JoinPlayer()
+	minetest.register_on_joinplayer(function(player)
+		if not player then
+			return
 		end
-		io.close(input)
-	end
+		if getXp(player) and getLvl(player) then
+			xp.xp_hud[player:get_player_name()] = player:hud_add({
+				hud_elem_type = "statbar",
+				position = {x=0.5,y=1.0},
+				size = {x=16, y=16},
+				offset = {x=-(32*8+16), y=-(48*2+16)},
+				text = "xp_xp.png",
+				number = 20*((getXp(player))/(xp.lvl * getLvl(player))),
+			})
+			xp.level_hud[player:get_player_name()] = player:hud_add({
+				hud_elem_type = "text",
+				position = {x=0.5,y=1},
+				text = getLvl(player),
+				number = 0xFFFFFF,
+				alignment = {x=0.5,y=1},
+				offset = {x=0, y=-(48*2+16)},
+			})
+		else
+			print(tostring('something, somewhere is going wrong')
+		end
+	end)
 end
 
-function xp.save_xp()
-	if xp.player_xp then
-		local output = io.open(xp.xp_file, "w")
-		local str = ""
-		for k, v in pairs(xp.player_xp) do
-			str = str .. k .. "=" .. v .. ","
-		end
-		str = str:sub(1, #str - 1)
-		output:write(str)
-		io.close(output)
-	end
-end
-
-function xp.load_levels()
-	local input = io.open(xp.lvl_file, "r")
-	if input then
-		local str = input:read()
-		if str then
-			for k, v in str.gmatch(str,"(%w+)=(%w+)") do
-    				xp.player_levels[k] = tonumber(v)
-			end
-		end
-		io.close(input)
-	end
-end
-
-function xp.save_levels()
-	if xp.player_xp then
-		local output = io.open(xp.lvl_file, "w")
-		local str = ""
-		for k, v in pairs(xp.player_levels) do
-			str = str .. k .. "=" .. v .. ","
-		end
-		str = str:sub(1, #str - 1)
-		output:write(str)
-		io.close(output)
-	end
+function xp.NewPlayer()
+	minetest.register_on_newplayer(function(ObjectRef)
+		ObjectRef:set_attribute('xp', 0)
+		ObjectRef:set_attribute('lvl', 1)
+	end)
 end
 
 function xp.explorer_xp()
@@ -169,7 +89,6 @@ function xp.explorer_xp()
 			end
 		end
 		xp.add_xp(nearest.name, 0.1)	
-		
 	end) 
 end
 
@@ -191,7 +110,6 @@ function xp.miner_xp()
 		elseif miner_xp.rm then
 			if player_lvls then
 				xp.add_xp(digger, (player_lvls["miner"]-1))
-				
 			end
 		elseif miner_xp.lvls then
 			if player_lvls and player_lvls["miner"] > 5 then
@@ -216,10 +134,10 @@ function xp.builder_xp()
 	end)
 end
 
+xp.NewPlayer()
+xp.JoinPlayer()
+
 xp.miner_xp()
 xp.crafter_xp()
 xp.explorer_xp()
 xp.builder_xp()
-
-xp.load_xp()
-xp.load_levels()

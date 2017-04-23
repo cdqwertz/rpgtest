@@ -37,7 +37,8 @@ function skills.level_up(name, text)
 	for s,l in pairs(skills.lvls[name]) do
 		count = count + (l-1)
 	end
-	if xp.player_levels[name] > count then
+	local playerObj = minetest.get_player_by_name(name)
+	if tonumber(playerObj:get_attribute('lvl')) > count then
 		skills.lvls[name][text] = skills.lvls[name][text] + 1
 		skills.save_skills()
 		cmsg.push_message_player(minetest.get_player_by_name(name), "[skills] " .. skills.get_text(name))
@@ -180,7 +181,7 @@ default.player_inventory.register_tab({
 			default.gui_colors .. 
 			default.gui_bg ..
 			"label[0,0;Skills:]" ..
-			"label[7,0;" .. tostring(xp.player_levels[name] - count) .. "]"
+			"label[7,0;" .. tostring(minetest.get_player_by_name(name):get_attribute('lvl') - count) .. "]"
 
 
 		local i = 0
@@ -225,11 +226,12 @@ minetest.register_chatcommand("skill", {
 				count = count + (l-1)
 			end
 			print(count)
-			print(xp.player_levels[name])
-			if xp.player_levels[name] > count then
+			local playerObj = minetest.get_player_by_name(name)
+			print(playerObj:get_attribute('lvl'))
+			if playerObj:get_attribute('lvl') > count then
 				skills.lvls[name][text] = skills.lvls[name][text] + 1
 				skills.save_skills()
-				cmsg.push_message_player(minetest.get_player_by_name(name), "[skills] " .. skills.get_text(name))
+				cmsg.push_message_player(playerObj, "[skills] " .. skills.get_text(name))
 				return true, "You leveled up " ..text
 			else
 				return true, "You cant level up "..text .. " at the moment."
@@ -404,39 +406,6 @@ skills.register_tool("bow", 1, 30, {
 	}
 })
 
-
--- minetest.override_item("default:stone_with_coal", {
--- 	on_dig = function(pos, node, player)
--- 		if skills.lvls[player:get_player_name()] then
--- 			xp.add_xp(player, (skills.lvls[player:get_player_name()]["miner"]-1))
--- 		end
--- 		minetest.node_dig(pos, node, player)
--- 	end,
--- })
--- 
--- minetest.override_item("default:stone_with_diamond", {
--- 	on_dig = function(pos, node, player)
--- 		if skills.lvls[player:get_player_name()] and skills.lvls[player:get_player_name()]["miner"] > 5 then
--- 			xp.add_xp(player,xp.get_xp(xp.player_levels[player:get_player_name()], 14))
--- 		end
--- 		minetest.node_dig(pos, node, player)
--- 	end,
--- })
--- 
--- minetest.override_item("default:stone", {
--- 	on_dig = function(pos, node, player)
--- 		if skills.lvls[player:get_player_name()] and skills.lvls[player:get_player_name()]["miner"] then
--- 			if skills.lvls[player:get_player_name()]["miner"] > 1 then
--- 				if math.random(0, 20) == 1 then
--- 					xp.add_xp(player,10)
--- 				end
--- 			end
--- 		end
--- 		minetest.node_dig(pos, node, player)
--- 	end,
--- 	
--- 	
--- })
 
 local modpath = minetest.get_modpath("skills")
 

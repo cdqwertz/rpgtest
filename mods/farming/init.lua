@@ -18,7 +18,7 @@ function farming.register_plant(name, steps, def)
 
 			on_dig = function(pos, node, player)
 				if skills.lvls[player:get_player_name()] and skills.lvls[player:get_player_name()]["farmer"] and skills.lvls[player:get_player_name()]["farmer"] > 4 then
-					xp.add_xp(player,xp.get_xp(xp.player_levels[player:get_player_name()], 100)*(i-1))
+					xp.add_xp(player,xp.get_xp(player:get_attribute('lvl'), 100)*(i-1))
 				end
 				minetest.node_dig(pos, node, player)
 			end,

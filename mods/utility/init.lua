@@ -1,7 +1,7 @@
 utility = {}
 
 utility.debugEnabled = false
-function utylity.debug(target)
+function utility.debug(target)
 	if not utility.debugEnabled then return end
 	if type(target) == "string" then
 		print(tostring(target))

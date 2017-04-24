@@ -79,7 +79,7 @@ function quests.finish_quest(player, quest)
 	if not(quest.done) then
 		cmsg.push_message_player(minetest.get_player_by_name(player), "[quest] You completed " .. quest.title)
 	end
-	xp.add_xp(minetest.get_player_by_name(player), quest.xp)
+	xp.add_xp(player, quest.xp)
 	quest.done = true
 	if quests.callback then
 		quests.callback(minetest.get_player_by_name(player))
@@ -104,7 +104,7 @@ function quests.finish_goal(player, quest, goal)
 		end
 
 		if goal.xp then
-			xp.add_xp(minetest.get_player_by_name(player), goal.xp)
+			xp.add_xp(player, goal.xp)
 		end
 	end
 

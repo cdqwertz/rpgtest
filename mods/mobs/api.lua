@@ -173,7 +173,7 @@ minetest.register_globalstep(function(dtime)
 			if #nodes_under_air > 0 then
 				local spawn_pos = nodes_under_air[math.random(#nodes_under_air)]
 
-				local spawn_mob = mobs.get_mob(player:get_attribute('lvl'))
+				local spawn_mob = mobs.get_mob(xp.getLvl(player))
 				minetest.add_entity(spawn_pos, spawn_mob)
 				mobs.count = mobs.count +1
 			end

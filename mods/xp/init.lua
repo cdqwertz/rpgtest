@@ -8,11 +8,11 @@ function xp.set_level_hud_text(player, str)
 	player:hud_change(xp.level_hud[player:get_player_name()], "text", str)
 end
 
-local function getXp(player)
+function xp.getXp(player)
 	return tonumber(player:get_attribute('xp'))
 end
 
-local function getLvl(player)
+function xp.getLvl(player)
 	return tonumber(player:get_attribute('lvl'))
 end
 
@@ -21,22 +21,22 @@ function xp.get_xp(lvl, x)
 end
 
 function xp.add_xp(player, num)
-	player:set_attribute('xp',getXp(player) + num)
+	player:set_attribute('xp',xp.getXp(player) + num)
 	cmsg.push_message_player(player, "[xp] +"..tostring(num))
-	if getXp(player) > xp.lvl * getLvl(player) then
-		player:set_attribute('xp', getXp(player) - (xp.lvl * getLvl(player)))
+	if xp.getXp(player) > xp.lvl * xp.getLvl(player) then
+		player:set_attribute('xp', xp.getXp(player) - (xp.lvl * xp.getLvl(player)))
 		xp.add_lvl(player)
 	end
-	print("[info] xp for player ".. player:get_player_name() .. " " .. getXp(player).."/".. xp.lvl * getLvl(player).." = " .. getXp(player) / ( xp.lvl * getLvl(player)))
-	player:hud_change(xp.xp_hud[player:get_player_name()], "number", 20 * ((getXp(player)) / (xp.lvl * getLvl(player))))
+	print("[info] xp for player ".. player:get_player_name() .. " " .. xp.getXp(player).."/".. xp.lvl * xp.getLvl(player).." = " .. xp.getXp(player) / ( xp.lvl * xp.getLvl(player)))
+	player:hud_change(xp.xp_hud[player:get_player_name()], "number", 20 * ((xp.getXp(player)) / (xp.lvl * xp.getLvl(player))))
 end
 
 function xp.add_lvl(player)
-	player:set_attribute('lvl',getLvl(player) + 1)
+	player:set_attribute('lvl',xp.getLvl(player) + 1)
 	if not(xp.custom_level_system) then
-		player:hud_change(xp.level_hud[player:get_player_name()], "text", getLvl(player))
+		player:hud_change(xp.level_hud[player:get_player_name()], "text", xp.getLvl(player))
 	end
-	cmsg.push_message_player(player, "Level up! You are now Level " .. tostring(getLvl(player)))
+	cmsg.push_message_player(player, "Level up! You are now Level " .. tostring(xp.getLvl(player)))
 end
 
 function xp.JoinPlayer()
@@ -44,25 +44,25 @@ function xp.JoinPlayer()
 		if not player then
 			return
 		end
-		if getXp(player) and getLvl(player) then
+		if xp.getXp(player) and xp.getLvl(player) then
 			xp.xp_hud[player:get_player_name()] = player:hud_add({
 				hud_elem_type = "statbar",
 				position = {x=0.5,y=1.0},
 				size = {x=16, y=16},
 				offset = {x=-(32*8+16), y=-(48*2+16)},
 				text = "xp_xp.png",
-				number = 20*((getXp(player))/(xp.lvl * getLvl(player))),
+				number = 20*((xp.getXp(player))/(xp.lvl * xp.getLvl(player))),
 			})
 			xp.level_hud[player:get_player_name()] = player:hud_add({
 				hud_elem_type = "text",
 				position = {x=0.5,y=1},
-				text = getLvl(player),
+				text = xp.getLvl(player),
 				number = 0xFFFFFF,
 				alignment = {x=0.5,y=1},
 				offset = {x=0, y=-(48*2+16)},
 			})
 		else
-			print(tostring('something, somewhere is going wrong')
+			print(tostring('something, somewhere is going wrong'))
 		end
 	end)
 end
@@ -77,18 +77,21 @@ end
 function xp.explorer_xp()
 	minetest.register_on_generated(function(minp, maxp, blockseed)
 		local center={x=minp.x+math.abs(minp.x-maxp.x),y=minp.y+math.abs(minp.y-maxp.y),z=minp.z+math.abs(minp.z-maxp.z)}
-		local nearest=nil
+		local player=nil
+		local top = nil
 		for i,v in pairs(minetest.get_connected_players()) do
 			local pos =v:getpos()
 			local dist=vector.distance(center, pos)
-			if nearest==nil then			
-				nearest={name=v,dist=dist}
-			elseif dist  < nearest.dist then  
-				nearest.dist = dist
-				nearest.name=v			
+			if player==nil then
+				player = v
+				top = dist
+				
+			elseif dist  < top then  
+				top = dist
+				player = v			
 			end
 		end
-		xp.add_xp(nearest.name, 0.1)	
+		xp.add_xp(player, 0.1)	
 	end) 
 end
 
@@ -113,7 +116,7 @@ function xp.miner_xp()
 			end
 		elseif miner_xp.lvls then
 			if player_lvls and player_lvls["miner"] > 5 then
-				xp.add_xp(digger,xp.get_xp(xp.player_levels[player], 14))
+				xp.add_xp(digger,xp.getLvl(digger), 14)
 			end
 		elseif miner_xp.rnd then
 			if math.random(miner_xp.rnd) == miner_xp.rnd then

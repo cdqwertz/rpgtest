@@ -38,7 +38,7 @@ function skills.level_up(name, text)
 		count = count + (l-1)
 	end
 	local playerObj = minetest.get_player_by_name(name)
-	if tonumber(playerObj:get_attribute('lvl')) > count then
+	if xp.getLvl(playerObj) > count then
 		skills.lvls[name][text] = skills.lvls[name][text] + 1
 		skills.save_skills()
 		cmsg.push_message_player(minetest.get_player_by_name(name), "[skills] " .. skills.get_text(name))
@@ -181,7 +181,7 @@ default.player_inventory.register_tab({
 			default.gui_colors .. 
 			default.gui_bg ..
 			"label[0,0;Skills:]" ..
-			"label[7,0;" .. tostring(minetest.get_player_by_name(name):get_attribute('lvl') - count) .. "]"
+			"label[7,0;" .. tostring(xp.getLvl(minetest.get_player_by_name(name)) - count) .. "]"
 
 
 		local i = 0
@@ -228,7 +228,7 @@ minetest.register_chatcommand("skill", {
 			print(count)
 			local playerObj = minetest.get_player_by_name(name)
 			print(playerObj:get_attribute('lvl'))
-			if playerObj:get_attribute('lvl') > count then
+			if xp.getLvl(playerObj) > count then
 				skills.lvls[name][text] = skills.lvls[name][text] + 1
 				skills.save_skills()
 				cmsg.push_message_player(playerObj, "[skills] " .. skills.get_text(name))

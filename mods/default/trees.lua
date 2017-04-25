@@ -3,7 +3,7 @@
 minetest.register_node("default:wood_tutorial", {
 	description = "Wood",
 	tiles = {"default_wood.png"},
-	groups = {choppy = 3, oddly_breakable_by_hand=1},
+	groups = {choppy = 3, oddly_breakable_by_hand=1, wood=1},
 	sounds = default.sounds.wood(),
 })
 
@@ -12,7 +12,7 @@ minetest.register_node("default:wood_tutorial", {
 minetest.register_node("default:wood", {
 	description = "Wood",
 	tiles = {"default_wood.png"},
-	groups = {choppy = 3},
+	groups = {choppy = 3, wood=1},
 	sounds = default.sounds.wood(),
 })
 
@@ -33,7 +33,7 @@ minetest.register_node("default:wooden_planks_2", {
 minetest.register_node("default:jungle_wood", {
 	description = "Jungle Wood",
 	tiles = {"default_jungle_wood.png"},
-	groups = {choppy = 3},
+	groups = {choppy = 3, wood=1},
 	sounds = default.sounds.wood(),
 })
 
@@ -54,7 +54,7 @@ minetest.register_node("default:wooden_planks_2_jungle", {
 minetest.register_node("default:birch_wood", {
 	description = "Birch Wood",
 	tiles = {"default_wood_birch.png"},
-	groups = {choppy = 3},
+	groups = {choppy = 3, wood=1},
 	sounds = default.sounds.wood(),
 })
 

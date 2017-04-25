@@ -319,30 +319,10 @@ minetest.register_craft({
 minetest.register_craft({
 	output = "default:workbench",
 	recipe = {
-		{"default:wood_tutorial", "default:wood_tutorial", "default:wood_tutorial"},
+		{"group:wood", "group:wood", "group:wood"},
 	}
 })
 
-minetest.register_craft({
-	output = "default:workbench",
-	recipe = {
-		{"default:wood", "default:wood", "default:wood"},
-	}
-})
-
-minetest.register_craft({
-	output = "default:workbench",
-	recipe = {
-		{"default:jungle_wood", "default:jungle_wood", "default:jungle_wood"},
-	}
-})
-
-minetest.register_craft({
-	output = "default:workbench",
-	recipe = {
-		{"default:birch_wood", "default:birch_wood", "default:birch_wood"},
-	}
-})
 
 minetest.register_craft({
 	output = "default:workbench_v2",

@@ -43,6 +43,7 @@ default.register_dye = function(color, description, recipe)
 	minetest.register_craftitem("default:dye_" .. color, {
 		description = description,
 		inventory_image = "default_dye.png^[colorize:"..color..":150",
+		trading = {price = 10,rarity = 6}
 	})
 	
 	minetest.register_craft({
@@ -64,45 +65,53 @@ minetest.register_craftitem("default:stone_item", {
 	description = "Stone",
 	inventory_image = "default_stone_item.png",
 	stack_max = 999,
+	trading = {price = 2,rarity = 1}
 })
 
 minetest.register_craftitem("default:flint", {
 	description = "Flint",
 	inventory_image = "default_flint.png",
-	trading = {price = 100}
+	trading = {price = 20,rarity = 6}
 })
 
 minetest.register_craftitem("default:coal_lump", {
 	description = "Coal Lump",
 	inventory_image = "default_coal_lump.png",
+	trading = {price = 30,rarity = 3}
 })
 
 minetest.register_craftitem("default:coal_dust", {
 	description = "Coal Dust",
 	inventory_image = "default_coal_dust.png",
+	trading = {price = 50,rarity = 8}
 })
 
 minetest.register_craftitem("default:diamond", {
 	description = "Diamond",
 	inventory_image = "default_diamond.png",
+	trading = {price = 1000,rarity = 50}
 })
 
 minetest.register_craftitem("default:ruby", {
 	description = "Ruby",
 	inventory_image = "default_ruby.png",
+	trading = {price = 500,rarity = 25}
 })
 
 minetest.register_craftitem("default:stick", {
 	description = "Stick",
 	inventory_image = "default_stick.png",
+	trading = {price = 5,rarity = 2}
 })
 
 minetest.register_craftitem("default:twig", {
 	description = "Twig",
 	inventory_image = "default_twig.png",
+	trading = {price =12 ,rarity = 2}
 })
 
 minetest.register_craftitem("default:blade", {
 	description = "Blade",
 	inventory_image = "default_blade.png",
+	trading = {price = 150,rarity = 2}
 })

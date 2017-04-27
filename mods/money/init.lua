@@ -101,32 +101,39 @@ minetest.register_node("money:trader", {
 		inv:set_size("main", 8*4)
 		inv:set_size("side", 8*4)
 		inv:set_size('sell',1*1)
-		local invs = meta:from_table({
-			inventory = {
-			main = {
-				[1] = "default:dirt", [2] = "", [3] = "", [4] = "",
-				[5] = "", [6] = "", [7] = "", [8] = "", [9] = "",
-				[10] = "", [11] = "", [12] = "", [13] = "",
-				[14] = "default:cobble", [15] = "", [16] = "", [17] = "",
-				[18] = "", [19] = "", [20] = "default:cobble", [21] = "",
-				[22] = "", [23] = "", [24] = "", [25] = "", [26] = "",
-				[27] = "", [28] = "", [29] = "", [30] = "", [31] = "",
-				[32] = ""},
-			
-			side = {
-				[1] = "default:stone", [2] = "", [3] = "", [4] = "",
-				[5] = "", [6] = "", [7] = "", [8] = "", [9] = "",
-				[10] = "", [11] = "", [12] = "", [13] = "",
-				[14] = "torch:torch", [15] = "", [16] = "", [17] = "",
-				[18] = "", [19] = "", [20] = "default:dirt", [21] = "",
-				[22] = "", [23] = "", [24] = "", [25] = "", [26] = "",
-				[27] = "", [28] = "", [29] = "", [30] = "", [31] = "",
-				[32] = ""},
-			sell = {
-				[1] = ""}
-			},
-			
-		})
+		local buyTable = money.createBuyTable()
+		for i,v in pairs(buyTable) do
+			meta:set_int(i,v)
+		end
+		print(dump(meta:to_table()))
+		money.createBuyInv(pos)
+		--inv:set_stack('side',1,{name='torch:torch'})
+-- 		local invs = meta:from_table({
+-- 			inventory = {
+-- 			main = {
+-- 				[1] = "default:dirt ", [2] = "", [3] = "", [4] = "",
+-- 				[5] = "", [6] = "", [7] = "", [8] = "", [9] = "",
+-- 				[10] = "", [11] = "", [12] = "", [13] = "",
+-- 				[14] = "default:cobble", [15] = "", [16] = "", [17] = "",
+-- 				[18] = "", [19] = "", [20] = "default:cobble", [21] = "",
+-- 				[22] = "", [23] = "", [24] = "", [25] = "", [26] = "",
+-- 				[27] = "", [28] = "", [29] = "", [30] = "", [31] = "",
+-- 				[32] = ""},
+-- 			
+-- 			side = {
+-- 				[1] = "default:dirt", [2] = "", [3] = "", [4] = "",
+-- 				[5] = "", [6] = "", [7] = "", [8] = "", [9] = "",
+-- 				[10] = "", [11] = "", [12] = "", [13] = "",
+-- 				[14] = "", [15] = "", [16] = "", [17] = "",
+-- 				[18] = "", [19] = "", [20] = "", [21] = "",
+-- 				[22] = "", [23] = "", [24] = "", [25] = "", [26] = "",
+-- 				[27] = "", [28] = "", [29] = "", [30] = "", [31] = "",
+-- 				[32] = ""},
+-- -- 			sell = {
+-- -- 				[1] = ""}
+-- 			},
+-- 			
+-- 		})
 		local background = 'background[0;0;0,0;money_shop_top.png;true]'--useless
 		local size='size[12,12,false]'
 		local container0='container[5,5]'
@@ -144,14 +151,15 @@ minetest.register_node("money:trader", {
 		print(tostring(inv))
 		available = {}
 		for name, def in pairs(minetest.registered_items) do
-			if def.trading then
-				available[name]=def.trading
+			if def.price then
+				available[name]=def.price
 			end
 		end
 		
 		local items = ''
 		local prices = ''
 		local buys = ''
+		local buy = 'list[context;side;0,0;8,4]'
 		local sell = 'list[context;sell;8,8;2,2]'
 		local player = 'list[current_player;main;0,8;8,4]'
 		local index = 1
@@ -185,8 +193,10 @@ minetest.register_node("money:trader", {
 			
 			
 		
-		meta:set_string('formspec', size ..items..prices ..buys..sell..player)
-		meta:set_string('formback', size ..items..prices ..buys..sell..player)
+		--meta:set_string('formspec', size ..items..prices ..buys..sell..player)
+		--meta:set_string('formback', size ..items..prices ..buys..sell..player)
+		meta:set_string('formspec',size .. buy .. player..sell)
+		meta:set_string('formback',size .. buy .. player..sell)
 	end,
 	on_receive_fields = function(pos, formname, fields, sender)
 		money.fields(formname,fields,pos)
@@ -195,16 +205,25 @@ minetest.register_node("money:trader", {
 	local meta = minetest.get_meta(pos)
 	local inv =meta:get_inventory()
 		if listname == 'sell' then
-			inv:set_stack('sell',1,{})
+			
 			local playerInv = player:get_inventory()
-			if playerInv:room_for_item("main", {name="money:coin", count=5}) then
-				playerInv:add_item("main", {name="money:coin", count=5})
-			else
-				inv:add_item('sell',{name="money:coin", count=5})
+			print(tostring(stack:to_table().name))
+			local _stack = stack:to_table()
+			local _stackCount = _stack.count
+			local _stackName = _stack.name
+			local _stackDef = minetest.registered_items[_stackName]
+			local _stackTrade = _stackDef.trading
+			print(tostring(_stackDef.price))
+			
+			local price = minetest.registered_items[stack:to_table().name].price or 2
+			price = price * stack:to_table().count
+			if playerInv:room_for_item("main", {name="money:coin", count=price/2}) then
+				playerInv:add_item("main", {name="money:coin", count=price/2})
+				inv:set_stack('sell',1,{})
 			end
 			
 		end
-		end,
+	end,
 })
 
 function money.fields(formname,fields,pos)
@@ -256,4 +275,35 @@ end
 money.received.buy = function(name,value,pos)
 	print(tostring('direct buy'))
 end
+money.createBuyTable = function(pos)
+-- 	local meta= minetest.get_meta(pos)
+-- 	local inv=meta:get_inventory()
+	local buyTable = {}
+	for name,def in pairs(minetest.registered_items)do
+		if def.trading then
+			if PseudoRandom(123):next(1,def.trading.rarity)==1 then
+				buyTable[name] = math.random(1,99)
+			end
+		end
+	end
+	return buyTable
+end
 
+money.createBuyInv = function(pos)
+ 	local meta= minetest.get_meta(pos)
+ 	local inv=meta:get_inventory()
+	index= 1
+	for name,def in pairs(minetest.registered_items)do
+		if def.trading then
+			if math.random(1,def.trading.rarity)==1 then
+				inv:set_stack('side',index,{name=name,count = 1})
+				index = index +1
+				
+			end
+		end
+	end
+	print(tostring('inv'))
+	
+	
+	
+end

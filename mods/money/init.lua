@@ -100,6 +100,7 @@ minetest.register_node("money:trader", {
 		local inv = meta:get_inventory()
 		inv:set_size("main", 8*4)
 		inv:set_size("side", 8*4)
+		inv:set_size('sell',1*1)
 		local invs = meta:from_table({
 			inventory = {
 			main = {
@@ -120,7 +121,9 @@ minetest.register_node("money:trader", {
 				[18] = "", [19] = "", [20] = "default:dirt", [21] = "",
 				[22] = "", [23] = "", [24] = "", [25] = "", [26] = "",
 				[27] = "", [28] = "", [29] = "", [30] = "", [31] = "",
-				[32] = ""}
+				[32] = ""},
+			sell = {
+				[1] = ""}
 			},
 			
 		})
@@ -139,11 +142,18 @@ minetest.register_node("money:trader", {
 		local scrollbar = 'scrollbar[0,0;1,1;horizontal;scroll;200]'
 		--local itembutton = 'item_image_button[0,0;1,1;' .. table.insert(items,v:to_table().name) .. ';torch;torch]'
 		print(tostring(inv))
-		local items = {}
-		local infos = ''
+		available = {}
+		for name, def in pairs(minetest.registered_items) do
+			if def.trading then
+				available[name]=def.trading
+			end
+		end
+		
+		local items = ''
 		local prices = ''
 		local buys = ''
-		local sells = ''
+		local sell = 'list[context;sell;8,8;2,2]'
+		local player = 'list[current_player;main;0,8;8,4]'
 		local index = 1
 		for i,v in pairs(meta:to_table().inventory.side) do
 			print(tostring(i))
@@ -151,51 +161,99 @@ minetest.register_node("money:trader", {
 			
 			if v:to_table() and v:to_table().name then
 				local name = v:to_table().name
+				local fieldItem = name
+				local nameItem = name
+				local labelItem = 'info'
 				local fnameinfo = name..'info'
 				local fnamebuy = name .. 'buy'
 				local fnamesell = name..'sell'
 				local _index = tostring(index)
 				local labelpos = tostring(index + 1)
 				local price = v:to_table().price or math.random(1,1000)
-				price = tostring(price)
-				table.insert(items,'item_image_button[1,'.. _index ..';2,2;' .. v:to_table().name .. ';' .. v:to_table().name .. ';' .. v:to_table().name .. ']')
-				infos = infos ..'button[3,'.. _index ..';1,1;'.. fnameinfo ..';info]'
+				
+				items = items ..'item_image_button[1,'.._index..';1,1;'.. fieldItem ..';'.. nameItem ..';'.. labelItem ..']'
 				prices = prices ..'label[3,'.. labelpos ..';$'.. price ..']'
-				buys = buys .. 'button[5,'.. _index ..';2,2;'.. fnamebuy ..';buy one]'
-				buys = buys .. 'button[5,'.. labelpos ..';2,2;'.. fnamesell ..';sell one]'
+				buys = buys .. 'button[5,'.. _index ..';1,1;'.. fnamebuy ..';buy one]'
+				buys = buys .. 'button[5,'.. labelpos ..';1,1;'.. fnamesell ..';sell one]'
+				
 
-				index = index+2
+				index = index+1
 			end
 			
 		end
-		itemslist = '' 
-		for i,v in pairs(items) do
-			itemslist = itemslist .. v
-		end
+
 			
 			
 		
-		meta:set_string('formspec', size ..itemslist..infos..prices ..buys)
+		meta:set_string('formspec', size ..items..prices ..buys..sell..player)
+		meta:set_string('formback', size ..items..prices ..buys..sell..player)
 	end,
 	on_receive_fields = function(pos, formname, fields, sender)
-		money.fields(formname,fields)
+		money.fields(formname,fields,pos)
 	end,
+	on_metadata_inventory_put = function(pos, listname, index, stack, player)
+	local meta = minetest.get_meta(pos)
+	local inv =meta:get_inventory()
+		if listname == 'sell' then
+			inv:set_stack('sell',1,{})
+			local playerInv = player:get_inventory()
+			if playerInv:room_for_item("main", {name="money:coin", count=5}) then
+				playerInv:add_item("main", {name="money:coin", count=5})
+			else
+				inv:add_item('sell',{name="money:coin", count=5})
+			end
+			
+		end
+		end,
 })
 
-function money.fields(formname,fields)
+function money.fields(formname,fields,pos)
+	print(tostring(formname))
 	for name,value in pairs(fields) do
-		print(tostring(formname))
+		if name == 'quit' and value then return end
+		
 		print(tostring(name))
 		print(tostring(value))
-		local aaa=money.received[value]()
+		
+		local aaa=money.received[value](name,value,pos)
 		
 	end
 end
 money.received = {}
-money.received.info = function(value)
-	print(tostring('informations'))
+money.received.formback= function(name,value,pos)
+	local meta=minetest.get_meta(pos)
+	meta:set_string('formspec',meta:get_string('formback'))
 end
-money.received.buy = function(value)
+money.received.info = function(name,value,pos)
+	local info = {}
+		info['groups'] = 'table'
+	local infos = ''
+	local index=4
+	for i,v in pairs(info) do
+		if v == 'table' then
+			for ii,vv in pairs(minetest.registered_items[name][i]) do
+				infos = infos..'label[3,]'
+				
+			end
+		end
+	end
+	print(tostring('informations'))
+	
+	local meta=minetest.get_meta(pos)
+	meta:set_string('formspec',
+	'size[12,12]'..
+	'button[10,0;2,2;back;formback]'..
+	'label[3,3;'..minetest.registered_items[name].name..']'..
+	'button[02,10;2,2;buy one;buy one]'..
+	'button[06,10;2,2;buy 5;buy 5]'..
+	'button[08,10;2,2;buy 10;buy 10]'..
+	'button[04,10;2,2;buy all;buy all]'
+	)
+	
+	
+end
+
+money.received.buy = function(name,value,pos)
 	print(tostring('direct buy'))
 end
 

@@ -69,6 +69,7 @@ minetest.register_craftitem("default:stone_item", {
 minetest.register_craftitem("default:flint", {
 	description = "Flint",
 	inventory_image = "default_flint.png",
+	trading = {price = 100}
 })
 
 minetest.register_craftitem("default:coal_lump", {

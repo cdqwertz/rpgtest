@@ -107,7 +107,7 @@ money.traderMainPage = function(inv)
 			items = items ..'item_image_button['..posx..','..posy..';1,1;'.. name ..';'.. name ..';'..count..']'
 			tooltips = tooltips .. 'tooltip['.. name ..';'.. price ..'\n'.. name ..']'
 			posx =posx+1
-			if posx > 8 then 
+			if posx == 8 then 
 				posx = 0
 				posy = posy +1
 			end
@@ -207,15 +207,18 @@ end
 money.createBuyInv = function(pos)
  	local meta= minetest.get_meta(pos)
  	local inv=meta:get_inventory()
-	inv:set_size("goods", 8*4)
+	inv:set_size("goods", 32)
 	inv:set_size('sell',1*1)
-	index= 1
-	for name,def in pairs(minetest.registered_items)do
-		if def.trading then
-			if math.random(1,def.trading.rarity)==1 then
-				inv:set_stack('goods',index,{name=name,count = math.random(1,100)})
-				index = index +1
-				
+	local index= 1
+	while inv:room_for_item('goods',{name='money:coin',count = 1}) do
+		
+		for name,def in pairs(minetest.registered_items)do
+			if def.trading then
+				if math.random(1,def.trading.rarity)==1 then
+					inv:add_item('goods',{name=name,count = math.random(1,100)})
+					index = index +1
+					
+				end
 			end
 		end
 	end

@@ -89,39 +89,41 @@ minetest.register_node("money:shop", {
 	end
 })
 
-money.startupTrader = function(pos)
-		local meta = minetest.get_meta(pos)
-		local inv = meta:get_inventory()
-		inv:set_size("goods", 8*4)
-		inv:set_size('sell',1*1)
-		--print(dump(meta:to_table()))
-		money.createBuyInv(pos)
-		local size='size[12,12,false]'
-		--print(tostring(inv))
-		local items = ''
-		local buy = 'list[context;goods;0,0;8,4]'
-		local sell = 'list[context;sell;8,8;2,2]'
-		local player = 'list[current_player;main;0,8;8,4]'
-		local tooltips = ''
-		local posx= 0
-		local posy = 0
-		for i,v in pairs(meta:to_table().inventory.goods) do
-			if v:to_table() and v:to_table().name then
-				local name = v:to_table().name
-				local count = v:to_table().count
-				local labelpos = tostring(index + 1)
-				local price = minetest.registered_items[name].trading.price
-				items = items ..'item_image_button['..posx..','..posy..';1,1;'.. name ..';'.. name ..';'..count..']'
-				tooltips = tooltips .. 'tooltip['.. name ..';'.. price ..'\n'.. name ..']'
-				posx =posx+1
-				if posx > 8 then 
-					posx = 0
-					posy = posy +1
-				end
+money.traderMainPage = function(inv)
+	local size='size[12,12,false]'
+	local items = ''
+	local buy = 'list[context;goods;0,0;8,4]'
+	local sell = 'list[context;sell;8,8;2,2]'
+	local player = 'list[current_player;main;0,8;8,4]'
+	local tooltips = ''
+	local posx= 0
+	local posy = 0
+	print(tostring(inv:get_list('goods')))
+	for i,v in pairs(inv:get_list('goods')) do
+		if v:to_table() and v:to_table().name then
+			local name = v:to_table().name
+			local count = v:to_table().count
+			local price = minetest.registered_items[name].trading.price
+			items = items ..'item_image_button['..posx..','..posy..';1,1;'.. name ..';'.. name ..';'..count..']'
+			tooltips = tooltips .. 'tooltip['.. name ..';'.. price ..'\n'.. name ..']'
+			posx =posx+1
+			if posx > 8 then 
+				posx = 0
+				posy = posy +1
 			end
 		end
-		meta:set_string('formspec', size ..items..sell..player..tooltips)
-		meta:set_string('formback', size ..items..sell..player..tooltips)
+	end
+	return size ..items..sell..player..tooltips
+end
+
+money.startupTrader = function(pos)
+	local meta = minetest.get_meta(pos)
+	local inv = meta:get_inventory()
+	
+	money.createBuyInv(pos)
+	local traderMainPage = money.traderMainPage(inv)
+	meta:set_string('formspec', traderMainPage)
+		
 end
 
 minetest.register_node("money:trader", {
@@ -139,6 +141,7 @@ minetest.register_node("money:trader", {
 	on_receive_fields = function(pos, formname, fields, sender)
 		money.fields(formname,fields,pos,sender)
 	end,
+	
 	on_metadata_inventory_put = function(pos, listname, index, stack, player)
 	local meta = minetest.get_meta(pos)
 	local inv =meta:get_inventory()
@@ -163,14 +166,25 @@ minetest.register_node("money:trader", {
 		end
 	end,
 })
+money.infopage = function(pos,item)
+	 	local meta= minetest.get_meta(pos)
+		local inv=meta:get_inventory()
+		if not inv:contains_item('goods',item) then
+			meta:set_string('formspec',money.traderMainPage(inv))
+		else
+			meta:set_string('formspec',money.infoItem(item))
+		end
+end
 
 function money.fields(formname,fields,pos,sender)
 	print('formname: '.. tostring(formname))
-
 	for name,value in pairs(fields) do
 		if name == 'quit' and value then return end
 		if name == 'back' then 
-			money.received.formback(name,value,pos) 
+			local meta = minetest.get_meta(pos)
+			local inv = meta:get_inventory()
+			local traderMainPage = money.traderMainPage(inv)
+			meta:set_string('formspec',traderMainPage)
 			return
 		end
 		print(tostring(name))
@@ -178,71 +192,54 @@ function money.fields(formname,fields,pos,sender)
 		if value == 'buyone' then
 			money[value](pos,sender,name)
 			
+		elseif value == 'buyall' then
+			money[value](pos,sender,name)
+			
+			
 		end
 		if minetest.registered_items[name] then
--- 			money.infopage(pos,name)
 			money.infopage(pos,name)
 			return
 		end
-		
-		
-		
 	end
-end
-money.received = {}
-money.received.formback= function(name,value,pos)
-	local meta=minetest.get_meta(pos)
-	meta:set_string('formspec',meta:get_string('formback'))
 end
 
 money.createBuyInv = function(pos)
  	local meta= minetest.get_meta(pos)
  	local inv=meta:get_inventory()
+	inv:set_size("goods", 8*4)
+	inv:set_size('sell',1*1)
 	index= 1
 	for name,def in pairs(minetest.registered_items)do
 		if def.trading then
 			if math.random(1,def.trading.rarity)==1 then
-				inv:set_stack('goods',index,{name=name,count = 1})
+				inv:set_stack('goods',index,{name=name,count = math.random(1,100)})
 				index = index +1
 				
 			end
 		end
 	end
-	print(tostring('inv'))
 	
 	
 	
 end
 
-money.infopage = function(pos,item)
-	 	local meta= minetest.get_meta(pos)
-		local inv=meta:get_inventory()
-		if not inv:contains_item('goods',item) then
-			--money.received.formback()
-			print(tostring('finidi'))
-		end
-			meta:set_string('formspec',money.infoItem(item))
-end
-money.infoItem = function(craftitem)
 
-	local pseudostack = ItemStack(craftitem)
-	local def = minetest.registered_items[craftitem]
+money.infoItem = function(item)
+	local def = minetest.registered_items[item]
 	local info = 'size[12,14]'
 	info = info .. 'bgcolor[#000000;false]'
 	info = info .. 'button[10,0;2,2;back;formback]'
-	info = info .. 'button[2,12;2,2;'..craftitem..';buyone]'
-	info = info .. 'button[6,12;2,2;'..craftitem..';buy5]'
-	info = info .. 'button[8,12;2,2;'..craftitem..';buy10]'
-	info = info .. 'button[4,12;2,2;'..craftitem..';buyall]'
+	info = info .. 'button[2,12;2,2;'..item..';buyone]'
+	info = info .. 'button[6,12;2,2;'..item..';buy5]'
+	info = info .. 'button[8,12;2,2;'..item..';buy10]'
+	info = info .. 'button[4,12;2,2;'..item..';buyall]'
 	
-	info = info .. 'item_image[0,0;2,2;'..craftitem..']'
+	info = info .. 'item_image[0,0;2,2;'..item..']'
 	info = info .. 'box[0,0;2,2;#00ff00]'
 	
 	info = info .. 'label[3,0;'..def.description..':]'
 	info = info .. 'box[3,0;4,0.5;#FF3333]'
-	
--- 	info = info .. 'label[0,2.5;type:]'
--- 	info = info .. 'label[6,2.5;craftitem]'
 	
 	local y = 2
 	local x = 0
@@ -330,13 +327,34 @@ money.buyone = function(pos,player,item)
 	local stackRm = {name='money:coin', count=minetest.registered_items[item].trading.price}
 	local space = playerInv:room_for_item("main", stackAdd)
 	local cash = playerInv:contains_item('main', stackRm)
-	
 	if space and cash then
 		print(tostring('item buyd'))
 		playerInv:add_item('main',stackAdd)
 		playerInv:remove_item('main', stackRm)
 		inv:remove_item('goods',stackAdd)
+	end
+	if not inv:contains_item('goods', stackAdd) then
 		
+	end
+	
+end
+
+money.buyall = function(pos,player,item)
+	print(tostring('buy all item'))
+	local meta = minetest.get_meta(pos)
+	local inv = meta:get_inventory()
+	local maxStack = ItemStack(item):get_stack_max()
+	local amount =inv:contains_item('goods',{name=item, count=maxStack})
+	local playerInv = player:get_inventory()
+	local removed = inv:remove_item('goods', {name=item, count=maxStack})
+	local rmt = removed:to_table()
+	local cash = playerInv:contains_item('main', {name = 'money:coin',count = rmt.count * minetest.registered_items[item].trading.price })
+	local space = playerInv:room_for_item("main", removed)
+	if space and cash then
+		playerInv:add_item('main',removed)
+		playerInv:remove_item('main', {name ='money:coin',count = rmt.count * minetest.registered_items[item].trading.price })
+	else 
+		inv:add_item('goods',removed)
 	end
 	
 end

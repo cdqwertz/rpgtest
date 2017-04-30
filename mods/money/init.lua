@@ -177,13 +177,14 @@ minetest.register_node("money:trader", {
 		end
 	end,
 })
-money.infopage = function(pos,item)
+money.infopage = function(pos,item,value)
 	 	local meta= minetest.get_meta(pos)
 		local inv=meta:get_inventory()
+		print(tostring(value))
 		if not inv:contains_item('goods',item) then
 			meta:set_string('formspec',money.traderMainPage(inv))
 		else
-			meta:set_string('formspec',money.infoItem(item))
+			meta:set_string('formspec',money.infoItem(item,value))
 		end
 end
 
@@ -205,7 +206,7 @@ function money.fields(formname,fields,pos,sender)
 			if money[value] then
 				money[value](pos,sender,name)
 			end
-			money.infopage(pos,name)
+			money.infopage(pos,name,value)
 			
 		end
 	end
@@ -293,11 +294,11 @@ money.buy10 = function(pos,player,item)
 end
 	
 
-money.infoItem = function(item)
+money.infoItem = function(item, count)
 	local def = minetest.registered_items[item]
-	local info = 'size[12,13]'
-	info = info .. 'bgcolor[#909090;true]'
-	info = info .. 'button[10,0;2,2;back;formback]'
+	local info = 'size[8,13]'
+	
+	info = info .. 'button[6,0;2,1;back;formback]'
 	info = info .. 'list[current_player;main;0,8;8,4]'
 	info = info .. 'button[0,12;2,2;'..item..';buyone]'
 	info = info .. 'button[2,12;2,2;'..item..';buy5]'
@@ -306,18 +307,22 @@ money.infoItem = function(item)
 	
 	info = info .. 'item_image[0,0;2,2;'..item..']'
 	info = info .. 'box[0,0;2,2;#00ff00]'
+	local level = def.level or 1
+	info = info .. 'label[2,0;'..def.description..':]'
+	info = info .. 'label[5,0;Level: '..level ..']'
+	info = info .. 'box[2,0;4,0.5;#FF3333]'
 	
-	info = info .. 'label[3,0;'..def.description..':]'
-	info = info .. 'box[3,0;4,0.5;#FF3333]'
+	info = info .. 'label[2,0.5;Price:]'
+	info = info .. 'label[5,0.5;'..def.trading.price..']'
+	
+	info = info .. 'label[2,1;Rarity:]'
+	info = info .. 'label[5,1;'..def.trading.rarity..']'
+	
+	--info = info .. 'label[2,1.5;In stock:]'
+	--info = info .. 'label[5,1.5;'..count..']'
 	
 	local y = 2
 	local x = 0
-	info = info .. 'label['..x..','..y..';price:]'
-	info = info .. 'label[6,'..y..';'..def.trading.price..']'
-	y = y+0.3
-	info = info .. 'label['..x..','..y..';rarity:]'
-	info = info .. 'label[6,'..y..';'..def.trading.rarity..']'
-	y = y+0.3
 
 	if def.drop then
 		info = info .. 'label['..x..','..y..';drop:]'

@@ -171,7 +171,7 @@ minetest.register_node("money:trader", {
 			if playerInv:room_for_item("main", {name="money:coin", count=price/2}) then
 				playerInv:add_item("main", {name="money:coin", count=price/2})
 				inv:set_stack('sell',1,{})
-				xp.add_xp(player,( price)  / 100)
+				xp.add_xp(player,price  / 100)
 			end
 			
 		end
@@ -180,7 +180,6 @@ minetest.register_node("money:trader", {
 money.infopage = function(pos,item)
 	 	local meta= minetest.get_meta(pos)
 		local inv=meta:get_inventory()
-		--money.test(item)
 		if not inv:contains_item('goods',item) then
 			meta:set_string('formspec',money.traderMainPage(inv))
 		else
@@ -386,3 +385,13 @@ money.infoItem = function(item)
 	
 	return info
 end
+
+minetest.register_lbm({
+	name = "money:trader",
+	nodenames = {"money:trader"},
+	run_at_every_load = true,
+	action = function(pos, node)
+		print(tostring('lbm'))
+		money.startupTrader(pos)
+	end,
+})

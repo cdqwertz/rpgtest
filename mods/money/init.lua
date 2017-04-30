@@ -171,6 +171,7 @@ minetest.register_node("money:trader", {
 			if playerInv:room_for_item("main", {name="money:coin", count=price/2}) then
 				playerInv:add_item("main", {name="money:coin", count=price/2})
 				inv:set_stack('sell',1,{})
+				xp.add_xp(player,( price)  / 100)
 			end
 			
 		end
@@ -213,11 +214,12 @@ end
 
 money.buyone = function(pos,player,item)
 	print(tostring('buy one item'))
+	local price = minetest.registered_items[item].trading.price
 	local meta = minetest.get_meta(pos)
 	local inv = meta:get_inventory()
 	local playerInv = player:get_inventory()
 	local stackAdd = {name=item, count=1}
-	local stackRm = {name='money:coin', count=minetest.registered_items[item].trading.price}
+	local stackRm = {name='money:coin', count=price}
 	local space = playerInv:room_for_item("main", stackAdd)
 	local cash = playerInv:contains_item('main', stackRm)
 	if space and cash then
@@ -225,6 +227,7 @@ money.buyone = function(pos,player,item)
 		playerInv:add_item('main',stackAdd)
 		playerInv:remove_item('main', stackRm)
 		inv:remove_item('goods',stackAdd)
+		xp.add_xp(player,price / 100)
 	end
 	if not inv:contains_item('goods', stackAdd) then
 		
@@ -241,11 +244,12 @@ money.buyall = function(pos,player,item)
 	local playerInv = player:get_inventory()
 	local removed = inv:remove_item('goods', {name=item, count=maxStack})
 	local rmt = removed:to_table()
-	local cash = playerInv:contains_item('main', {name = 'money:coin',count = rmt.count * price})
+	local cash = playerInv:contains_item('main', {name = 'money:coin',count = removed:get_count() * price})
 	local space = playerInv:room_for_item("main", removed)
 	if space and cash then
 		playerInv:add_item('main',removed)
-		playerInv:remove_item('main', {name ='money:coin',count = rmt.count * price })
+		playerInv:remove_item('main', {name ='money:coin',count = removed:get_count() * price })
+		xp.add_xp(player,(removed:get_count() * price)  / 100)
 	else 
 		inv:add_item('goods',removed)
 	end
@@ -264,6 +268,7 @@ money.buy5 = function(pos,player,item)
 	if space and cash then
 		playerInv:add_item('main',removed)
 		playerInv:remove_item('main', {name ='money:coin',count = removed:get_count() * price })
+		xp.add_xp(player,(removed:get_count() * price)  / 100)
 	else 
 		inv:add_item('goods',removed)
 	end
@@ -282,6 +287,7 @@ money.buy10 = function(pos,player,item)
 	if space and cash then
 		playerInv:add_item('main',removed)
 		playerInv:remove_item('main', {name ='money:coin',count = removed:get_count() * price })
+		xp.add_xp(player,(removed:get_count() * price)  / 100)
 	else 
 		inv:add_item('goods',removed)
 	end

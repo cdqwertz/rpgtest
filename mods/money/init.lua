@@ -1,5 +1,6 @@
 minetest.register_craftitem("money:coin", {
 	description = "Coin",
+	stack_max = 100000,
 	inventory_image = "money_coin.png",
 })
 
@@ -125,10 +126,14 @@ money.startupTrader = function(pos)
 	meta:set_string('formspec', traderMainPage)
 		
 end
+local modpathNpcs = minetest.get_modpath('npcs') .. '/models/npc.x'
+
 
 minetest.register_node("money:trader", {
 	description = "trader",
-	tiles = {"money_shop_top.png", "money_shop_bottom.png", "money_shop.png","money_shop.png"},
+	drawtype ='mesh',
+	mesh = 'npc.x',
+	tiles = {"character.png"},
 	groups = {choppy = 3},
 	paramtype2 = "facedir",
 	
@@ -155,7 +160,6 @@ minetest.register_node("money:trader", {
 			local _stackDef = minetest.registered_items[_stackName]
 			local _stackTrade = _stackDef.trading
 			print(tostring(_stackDef.price))
-			
 			local price = minetest.registered_items[stack:to_table().name].price or 2
 			price = price * stack:to_table().count
 			if playerInv:room_for_item("main", {name="money:coin", count=price/2}) then
@@ -230,13 +234,14 @@ end
 
 money.infoItem = function(item)
 	local def = minetest.registered_items[item]
-	local info = 'size[12,14]'
-	info = info .. 'bgcolor[#000000;false]'
+	local info = 'size[12,13]'
+	info = info .. 'bgcolor[#909090;true]'
 	info = info .. 'button[10,0;2,2;back;formback]'
-	info = info .. 'button[2,12;2,2;'..item..';buyone]'
-	info = info .. 'button[6,12;2,2;'..item..';buy5]'
-	info = info .. 'button[8,12;2,2;'..item..';buy10]'
-	info = info .. 'button[4,12;2,2;'..item..';buyall]'
+	info = info .. 'list[current_player;main;0,8;8,4]'
+	info = info .. 'button[0,12;2,2;'..item..';buyone]'
+	info = info .. 'button[2,12;2,2;'..item..';buy5]'
+	info = info .. 'button[4,12;2,2;'..item..';buy10]'
+	info = info .. 'button[6,12;2,2;'..item..';buyall]'
 	
 	info = info .. 'item_image[0,0;2,2;'..item..']'
 	info = info .. 'box[0,0;2,2;#00ff00]'
@@ -248,70 +253,70 @@ money.infoItem = function(item)
 	local x = 0
 	info = info .. 'label['..x..','..y..';price:]'
 	info = info .. 'label[6,'..y..';'..def.trading.price..']'
-	y = y+0.5
+	y = y+0.3
 	info = info .. 'label['..x..','..y..';rarity:]'
 	info = info .. 'label[6,'..y..';'..def.trading.rarity..']'
-	y = y+0.5
+	y = y+0.3
 
 	if def.drop then
 		info = info .. 'label['..x..','..y..';drop:]'
 		info = info .. 'label[6,'..y..';'..def.drop..']'
-		y = y+0.5
+		y = y+0.3
 	end
 	if def.climbable then
 		info = info .. 'label['..x..','..y..';climbable:]'
 		info = info .. 'label[6,'..y..';'..def.climbable..']'
-		y = y+0.5
+		y = y+0.3
 	end
 	if def.damage_per_second then
 		info = info .. 'label['..x..','..y..';damage_per_second:]'
 		info = info .. 'label[6,'..y..';'..def.damage_per_second..']'
-		y = y+0.5
+		y = y+0.3
 	end
 	
 	if def.tool_capabilities then
 
 		for name,value in pairs(def.tool_capabilities) do
 			info = info .. 'label['..x..','..y..';'.. name ..':]'
-			y=y+0.5
-			xx = 0
+			y=y+0.3
+			local xx = 0
 			
 			if type(value) == 'table' then
-				x=x+1
+				x=x+0.5
 				for index,data in pairs(value)do
 					info = info .. 'label['..x..','..y..';'.. index ..':]'
 					
-					y=y+0.5
+					y=y+0.3
 					if type(data) == 'table' then
-						x=x+1
+						x=x+0.5
 						for pos, entry in pairs(data)do
 							info = info .. 'label['..x..','..y..';'.. pos ..':]'
 							
-							y = y+0.5
+							y = y+0.3
 							if type(entry) == 'table' then
 								x=x+1
 								
 								for row,caps in pairs(entry) do
 									info = info .. 'label['..x..','..y..';'.. row ..':]'
 									info = info .. 'label['.. 6 ..','..y..';'.. caps ..']'
-									y=y+0.5
+									y=y+0.3
 									
 								end
 								x=xx
 							else
-								info = info .. 'label['.. 6 ..','..y-0.5 ..';'.. entry ..']'
+								info = info .. 'label['.. 6 ..','..y-0.3 ..';'.. entry ..']'
 								
 							end
 						
 						end
 						x=xx
 					else
-						info = info .. 'label['.. 6 ..','..y-0.5 ..';'.. data ..']'
+						info = info .. 'label['.. 6 ..','..y-0.3 ..';'.. data ..']'
 					end
 				end
 				x=xx
 			else
-				info = info .. 'label['.. 6 ..','..y-0.5 ..';'.. value ..']'
+				info = info .. 'label['.. 6 ..','..y-0.3 ..';'.. value ..']'
 			end
 		end
 		x=xx
@@ -347,7 +352,6 @@ money.buyall = function(pos,player,item)
 	local meta = minetest.get_meta(pos)
 	local inv = meta:get_inventory()
 	local maxStack = ItemStack(item):get_stack_max()
-	local amount =inv:contains_item('goods',{name=item, count=maxStack})
 	local playerInv = player:get_inventory()
 	local removed = inv:remove_item('goods', {name=item, count=maxStack})
 	local rmt = removed:to_table()
@@ -361,6 +365,7 @@ money.buyall = function(pos,player,item)
 	end
 	
 end
+
 	
 
 

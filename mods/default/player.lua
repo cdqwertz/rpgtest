@@ -76,6 +76,7 @@ function default.player_inventory.get_default_inventory_formspec()
 end
 
 minetest.register_on_player_receive_fields(function(player, formname, fields)
+
 	if not(formname == "") then
 		return
 	end

@@ -166,7 +166,10 @@ minetest.register_node("money:trader", {
 		if listname == 'sell' then
 			local playerInv = player:get_inventory()
 			print(tostring(stack:get_definition()))
-			local price = stack:get_definition().trading.price or 2
+			local price = 2
+			if stack:get_definition().trading then
+				price = stack:get_definition().trading.price
+			end
 			price = price * stack:to_table().count
 			if playerInv:room_for_item("main", {name="money:coin", count=price/2}) then
 				playerInv:add_item("main", {name="money:coin", count=price/2})

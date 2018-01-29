@@ -26,7 +26,8 @@ minetest.register_tool("default:simple_hammer", {
 			choppy={times={[2]=1.50, [3]=1.00}, uses=20, maxlevel=1}
 		},
 		damage_groups = {fleshy=1},
-	}
+	},
+	trading={price = 250,rarity = 1}
 })
 
 -- flint
